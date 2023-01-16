@@ -19,6 +19,7 @@ public class MainConfiguration {
     private boolean includeRawText;
     private boolean includeParsedParagraphs;
     private List<RelationType> relationTypes;
+    private long limit = Long.MAX_VALUE;
 
     public String getExportMethod() {
         return exportMethod;
@@ -90,5 +91,13 @@ public class MainConfiguration {
 
     public void setWikidataJsonOutput(String wikidataJsonOutput) {
         this.wikidataJsonOutput = wikidataJsonOutput;
+    }
+
+    public long getLimit() {
+        return limit;
+    }
+
+    public void setLimit(long limit) {
+        this.limit = limit;
     }
 }

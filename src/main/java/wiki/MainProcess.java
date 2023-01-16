@@ -72,13 +72,15 @@ public class MainProcess {
             File wikifile = new File(this.mainConfiguration.getWikipediaDump());
             if(wikifile.exists()) {
                 inputStream = WikiToElasticUtils.openCompressedFileInputStream(wikifile.getPath());
+                inputStream = new BufferedInputStream(inputStream, 1024 * 1024);
 
                 // Delete if index already exists
                 System.out.println("Would you like to clean & delete index (if exists) \"" + indexName +
                         "\" or update (new pages) in it [D(Delete)/U(Update)]");
 
                 // Scans the next token of the input as an int.
-                String ans = reader.nextLine();
+                // String ans = reader.nextLine();
+                String ans = "d";
 
                 if(ans.equalsIgnoreCase("d") || ans.equalsIgnoreCase("delete")) {
                     api.deleteIndex();

@@ -209,11 +209,12 @@ public class ElasticAPI implements IAPI<AcknowledgedResponse> {
 
                 this.available.acquire();
                 res = this.client.index(indexRequest, RequestOptions.DEFAULT);
-                this.available.release();
                 this.totalIdsSuccessfullyCommitted.incrementAndGet();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            this.available.release();
         }
     }
 

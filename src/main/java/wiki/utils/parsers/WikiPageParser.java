@@ -1,12 +1,15 @@
 package wiki.utils.parsers;
 
+import info.bliki.wiki.filter.PlainTextConverter;
 import info.bliki.wiki.model.WikiModel;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import wiki.handlers.ParagraphConverter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,6 +34,26 @@ public class WikiPageParser {
             allPageParagraphs = null;
         }
         return allPageParagraphs;
+    }
+
+    public static String formatPage(String source) {
+        StringBuilder result = new StringBuilder();
+        try {
+            WikiModel.toText(new WikiModel("/${image}", "/${title}"), new PlainTextConverter(false), source, result, false, false);
+        } catch (IOException e) {
+            return source;
+        }
+        return result.toString();
+    }
+
+    public static List<String> paragraphs(String source) {
+        List<String> result = new ArrayList<>();
+        try {
+            WikiModel.toText(new WikiModel("/${image}", "/${title}"), new ParagraphConverter(result), source, null, false, false);
+        } catch (IOException e) {
+            return List.of();
+        }
+        return result;
     }
 
     public static String extractFirstPageParagraph(String text) {

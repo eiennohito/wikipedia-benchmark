@@ -20,7 +20,11 @@ public class WikiToElasticUtils {
         LOGGER.debug("opening compressed input stream");
         FileInputStream fin = new FileInputStream(fileIn);
         boolean multiStream = fileIn.contains("multistream");
-        return new BZip2CompressorInputStream(fin, multiStream);
+        if (fileIn.endsWith(".bz2")) {
+            return new BZip2CompressorInputStream(fin, multiStream);
+        } else {
+            return fin;
+        }
     }
 
     public static void closeCompressedFileInputStream(InputStream is) throws IOException {

@@ -1,13 +1,10 @@
 {
   "exportMethod": "elastic",
-  "extractRelationFields": true,
-  "wikipediaDump": "dumps/tinywiki-latest-pages-articles.xml.bz2",
-  "lang": "en",
-  "includeRawText" : true,
-  "relationTypes": [
-    "Category",
-    "Infobox",
-    "Parenthesis",
-    "PartName"
-  ]
+  "extractRelationFields": false,
+  "wikipediaDump": "e:\\data\\wikipedia\\jawiki-20221220-pages-articles-multistream.xml\\jawiki-20221220-pages-articles-multistream.xml",
+  "lang": "ja",
+  "includeRawText" : false,
+  "includeParsedParagraphs": true,
+  "relationTypes": [],
+  "limit": 10000
 }

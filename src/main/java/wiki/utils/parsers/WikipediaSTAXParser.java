@@ -53,6 +53,7 @@ public class WikipediaSTAXParser implements Closeable {
     private final Set<Long> totalIds = new HashSet<>();
     private boolean extractFields;
     private DeleteUpdateMode deleteUpdateMode;
+    private long maxEntries = Long.MAX_VALUE;
 
 
     public WikipediaSTAXParser(IPageHandler handler, LangConfiguration langConfig, boolean includeRawText, boolean includeParseParagraphs) {
@@ -70,6 +71,7 @@ public class WikipediaSTAXParser implements Closeable {
         this(handler, langConfig, config.isIncludeRawText(), config.isIncludeParsedParagraphs());
         this.deleteUpdateMode = mode;
         this.extractFields = config.isExtractRelationFields();
+        this.maxEntries = config.getLimit();
     }
 
     /**
@@ -80,12 +82,16 @@ public class WikipediaSTAXParser implements Closeable {
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             XMLEventReader reader = factory.createXMLEventReader(inputStream);
+            long count = 0;
             // Go over the xml element and search for <page> element
             while (reader.hasNext()) {
                 final XMLEvent event = reader.nextEvent();
                 if (event.isStartElement() && event.asStartElement().getName()
                         .getLocalPart().equals(PAGE_ELEMENT)) {
-                    parsePage(reader);
+                    count += parsePage(reader);
+                }
+                if (count > maxEntries) {
+                    break;
                 }
             }
 
@@ -100,7 +106,7 @@ public class WikipediaSTAXParser implements Closeable {
      * @param reader
      * @throws XMLStreamException
      */
-    private void parsePage(final XMLEventReader reader) throws XMLStreamException {
+    private int parsePage(final XMLEventReader reader) throws XMLStreamException {
         String title = null;
         long id = -1;
         String text = null;
@@ -141,22 +147,24 @@ public class WikipediaSTAXParser implements Closeable {
                 if (this.handler.isPageExists(String.valueOf(id))) {
                     LOGGER.info("Page with id-" + id + ", title-" + title + ", already exist, moving on...");
                 } else {
-                    handlePage(title, id, text, redirect);
+                    return handlePage(title, id, text, redirect);
                 }
             } else {
-                handlePage(title, id, text, redirect);
+                return handlePage(title, id, text, redirect);
             }
         }
+        return 0;
     }
 
     /**
      * Processing the page in a separate thread (extracting relations and adding to persistence queue)
      */
-    private void handlePage(String title, long id, String text, String redirect) {
+    private int handlePage(String title, long id, String text, String redirect) {
         String titleLow = title.toLowerCase();
-        // If page is a meta data page, don't process it
+        // If page is a metadata page, don't process it
         if(Arrays.stream(filterTitles).parallel().anyMatch(titleLow::contains)) {
             LOGGER.info("Skipping page processing of- " + title);
+            return 0;
         } else {
             this.executorService.submit(() -> {
                 try {
@@ -177,14 +185,18 @@ public class WikipediaSTAXParser implements Closeable {
                             .setRedirectTitle(redirect)
                             .setRelations(relations);
 
-                    if(includeRawText && !text.isEmpty()) {
-                        pageBuilder.setText(text);
-                    } else {
+                    if (text.isEmpty()) {
                         pageBuilder.setText(null);
+                    } else {
+                        if (includeRawText) {
+                            pageBuilder.setText(text);
+                        } else {
+                            pageBuilder.setText(null);
+                        }
                     }
 
                     if(includeParsedParagraphs) {
-                        List<String> allPageParagraphs = WikiPageParser.extractAllPageParagraphs(text, MAX_WORD_COUNT);
+                        List<String> allPageParagraphs = WikiPageParser.paragraphs(text);
                         pageBuilder.setParsedParagraphs(allPageParagraphs);
                     } else {
                         pageBuilder.setParsedParagraphs(null);
@@ -200,6 +212,7 @@ public class WikipediaSTAXParser implements Closeable {
                 }
             });
         }
+        return 1;
     }
 
     public Set<Long> getTotalIds() {

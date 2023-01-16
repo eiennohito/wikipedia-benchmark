@@ -44,9 +44,13 @@ public class PageHandler implements IPageHandler {
     public void addPage(WikipediaParsedPage page) {
         synchronized (this.lock) {
             if (page != null) {
-                pages.add(page);
-                if (this.pages.size() == this.bulkSize) {
-                    flush();
+                if (this.bulkSize > 1) {
+                    pages.add(page);
+                    if (this.pages.size() == this.bulkSize) {
+                        flush();
+                    }
+                } else {
+                    api.addDoc(page);
                 }
             }
         }

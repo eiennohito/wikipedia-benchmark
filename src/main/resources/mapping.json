@@ -42,9 +42,32 @@
           }
         }
       },
-      "text": {
+      "parsedParagraphs": {
         "type": "text",
-        "similarity": "BM25"
+        "similarity": "BM25",
+        "analyzer": "plain",
+        "fields": {
+          "prefix": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "prefix",
+            "search_analyzer": "near_match"
+          },
+          "prefix_asciifolding": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "prefix_asciifolding",
+            "search_analyzer": "near_match_asciifolding"
+          },
+          "near_match": {
+            "type": "text",
+            "index_options": "docs",
+            "similarity": "BM25",
+            "analyzer": "near_match"
+          }
+        }
        },
       "redirectTitle": {
         "type": "keyword"
