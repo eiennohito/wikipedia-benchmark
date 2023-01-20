@@ -1,3 +1,10 @@
+# What is this
+
+This is a fork of https://github.com/AlonEirew/wikipedia-to-elastic for benchmarking Sudachi ElasticSearch plugin. 
+It is mostly a dirty hack around the original project and should be only use for benchmarking purposes.
+
+Edit configuration files to set up the paths to the Wikipedia dump.
+
 <p align="center">
     <a href="https://doi.org/10.5281/zenodo.3239509">
         <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3239509.svg" alt="DOI">
